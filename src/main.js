@@ -3,15 +3,21 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 import { Spinner } from 'spin.js';
 
+let searchQuery = null;
+let page = 1;
+const perPage = 12;
+
 axios.defaults.baseURL = 'https://api.unsplash.com';
 axios.defaults.headers.common['Authorization'] =
   'Client-ID LxvKVGJqiSe6NcEVZOaLXC-f2JIIWZaq_o0WrF8mwJc';
 
-function getPhotos(query) {
+function getPhotos(query, page = 1, perPage) {
   return axios.get('/search/photos', {
     params: {
       query,
       orientation: 'portrait',
+      page,
+      per_page: perPage,
     },
   });
 }
@@ -40,6 +46,23 @@ const opts = {
 const spinnerContainer = document.querySelector('.js-backdrop');
 const spinner = new Spinner(opts);
 
+const options = {
+  root: null,
+  rootMargin: '100px',
+  threshold: 1.0,
+};
+
+const callback = function (entries, observer) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      observer.unobserve(entry.target);
+      loadMoreData();
+    }
+  });
+};
+
+const observer = new IntersectionObserver(callback, options);
+
 const formEl = document.querySelector('.js-search-form');
 const listEl = document.querySelector('.js-gallery');
 
@@ -48,14 +71,15 @@ formEl.addEventListener('submit', onSubmit);
 async function onSubmit(event) {
   event.preventDefault();
   spinnerPlay();
-  const searchQuery =
-    event.currentTarget.elements['user-search-query'].value.trim();
-  console.log(searchQuery);
+
+  searchQuery = event.currentTarget.elements['user-search-query'].value.trim();
+
+  page = 1;
 
   try {
     const {
-      data: { results },
-    } = await getPhotos(searchQuery);
+      data: { results, total_pages },
+    } = await getPhotos(searchQuery, page, perPage);
     if (results.length === 0) {
       iziToast.error({
         message:
@@ -64,6 +88,27 @@ async function onSubmit(event) {
     }
     console.log(results);
     listEl.innerHTML = createMarkup(results);
+
+    hasMoreData(total_pages);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    spinnerStop();
+  }
+}
+async function loadMoreData() {
+  page += 1;
+
+  spinnerPlay();
+
+  try {
+    const {
+      data: { results, total_pages },
+    } = await getPhotos(searchQuery, page, perPage);
+
+    listEl.insertAdjacentHTML('beforeend', createMarkup(results));
+
+    hasMoreData(total_pages);
   } catch (error) {
     console.log(error);
   } finally {
@@ -89,4 +134,15 @@ function spinnerPlay() {
 function spinnerStop() {
   spinner.stop();
   spinnerContainer.classList.add('is-hidden');
+}
+
+function hasMoreData(lastPage) {
+  if (page < lastPage) {
+    const item = document.querySelector('.gallery__item:last-child');
+    observer.observe(item);
+  } else {
+    iziToast.error({
+      message: " We're sorry, but you've reached the end of search results.",
+    });
+  }
 }
