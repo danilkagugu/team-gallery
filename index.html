@@ -7,53 +7,19 @@
     <title>Vanilla App Template</title>
     
     <script type="module" crossorigin src="/team-gallery/commonHelpers.js"></script>
-    <link rel="stylesheet" href="/team-gallery/assets/index-c9db6b34.css">
+    <link rel="stylesheet" href="/team-gallery/assets/index-5059eb80.css">
   </head>
   <body>
-    <section class="vite-promo">
+    <section class="gallery-section">
   <div class="container">
-    <div class="wrapper">
-      <h2 class="title">
-        <span class="gradient">Vite</span>
-      </h2>
-      <p class="text">Next Generation Frontend Tooling</p>
-      <p class="tagline">
-        Get ready for a development environment that can finally catch up with
-        you.
-      </p>
+    <h1>InfiniteScroll</h1>
+    <form class="search-form js-search-form">
+      <input type="text" name="user-search-query" class="search-input" />
+      <button type="submit" class="search-btn">search</button>
+    </form>
+    <ul class="gallery js-gallery list"></ul>
 
-      <ul class="actions">
-        <li class="action">
-          <a
-            class="link"
-            href="https://vitejs.dev/guide/"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Get Started</a
-          >
-        </li>
-        <li class="action">
-          <a
-            class="link"
-            href="https://github.com/vitejs/vite"
-            target="_blank"
-            rel="noopener noreferrer"
-            >View on GitHub</a
-          >
-        </li>
-      </ul>
-    </div>
-
-    <div class="thumb">
-      <!-- Path to images as from index.html file -->
-      <img
-        class="pic"
-        src="/team-gallery/assets/vite-logo-51249ca9.png"
-        alt="Vite logo"
-        width="640"
-        height="640"
-      />
-    </div>
+    <div class="backdrop js-backdrop is-hidden"></div>
   </div>
 </section>
 
